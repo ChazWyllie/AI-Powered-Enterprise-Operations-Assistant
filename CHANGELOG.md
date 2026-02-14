@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-02-13
+
+### Added
+
+- **WP3 Agent Orchestration Layer**
+  - LLM interface and stub (`app/llm.py`):
+    - Abstract `LLMInterface` base class with tool call support
+    - `LLMStub` for deterministic testing with intent pattern matching
+    - `OpenAILLM` production implementation with GPT-4 tool definitions
+    - Structured `LLMResponse` with answer, tool_calls, and reasoning fields
+  - Agent orchestrator (`app/orchestrator.py`):
+    - `OrchestratorMode` enum: PLAN_ONLY and EXECUTE_SAFE modes
+    - `OrchestratorResponse` dataclass with answer, plan, actions_taken, script, audit
+    - `AgentOrchestrator` class coordinating LLM decisions and tool execution
+    - Automatic tool mapping to MCP functions (get_logs, get_system_status, run_command, update_config)
+    - Audit trail with trace_id and mode tracking
+    - Script generation from execution results
+  - Test suite expanded: 18 orchestrator tests (85 total tests)
+
+### Architecture
+
+- Clean separation: LLM makes decisions, orchestrator coordinates, MCP tools execute
+- Deterministic LLMStub enables reliable testing without LLM API calls
+- PLAN_ONLY mode never executes, returns plan only
+- EXECUTE_SAFE mode executes with full policy enforcement
+
 ## [0.2.0] - 2026-02-13
 
 ### Added
