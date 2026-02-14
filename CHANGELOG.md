@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-02-13
+
+### Added
+
+- **WP5 Langfuse Observability**
+  - Observability module (`app/observability.py`) with trace/span management:
+    - `ObservabilityClient` abstract base for pluggable backends
+    - `MockObservabilityClient` for deterministic testing
+    - `LangfuseObservabilityClient` for production tracing
+    - `Trace` class with metadata, tags, input/output recording
+    - `Span` class for operation-level tracing with status tracking
+    - `Generation` class for LLM call tracking with token usage
+  - Orchestrator integration:
+    - Each `/chat` request creates a trace with unique trace_id
+    - LLM calls recorded as spans with input/output
+    - Tool calls recorded as individual spans with success/error status
+    - Trace output includes answer, plan count, actions count
+  - Configuration via environment variables:
+    - `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_HOST`
+    - Falls back to mock client when not configured
+  - Test suite expanded: 23 observability tests (126 total tests)
+
+### Observability
+
+- Traces automatically created for all `/chat` requests
+- Spans record: LLM generation, tool execution, errors
+- Trace IDs returned in API response audit object
+- Token usage tracked for LLM generations
+
 ## [0.4.0] - 2026-02-13
 
 ### Added

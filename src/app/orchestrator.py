@@ -1,6 +1,7 @@
 """Agent Orchestrator for AI-powered operations.
 
 WP3: Implements the agent "brain" with plan_only and execute_safe modes.
+WP5: Integrated with Langfuse observability for tracing.
 """
 
 import logging
@@ -11,6 +12,11 @@ from typing import Any
 
 from app.llm import LLMInterface, LLMStub, OpenAILLM
 from app.mcp.tools import get_logs, get_system_status, run_command, update_config
+from app.observability import (
+    ObservabilityClient,
+    Trace,
+    get_observability_client,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -68,18 +74,27 @@ class AgentOrchestrator:
         "update_config": update_config,
     }
 
-    def __init__(self, use_stub: bool = False, api_key: str | None = None):
+    def __init__(
+        self,
+        use_stub: bool = False,
+        api_key: str | None = None,
+        observability_client: ObservabilityClient | None = None,
+    ):
         """Initialize the orchestrator.
 
         Args:
             use_stub: If True, use deterministic LLM stub for testing.
             api_key: OpenAI API key (only used if use_stub=False).
+            observability_client: Optional observability client for tracing.
         """
         self.use_stub = use_stub
         if use_stub:
             self.llm: LLMInterface = LLMStub()
         else:
             self.llm = OpenAILLM(api_key=api_key)
+
+        # Initialize observability - use provided client or create default
+        self.observability = observability_client or get_observability_client(use_mock=use_stub)
 
         logger.info(f"AgentOrchestrator initialized with {'stub' if use_stub else 'OpenAI'} LLM")
 
@@ -103,15 +118,40 @@ class AgentOrchestrator:
         if context is None:
             context = OrchestratorContext()
 
+        # Create observability trace for this request
+        trace = self.observability.create_trace(
+            name="chat-request",
+            user_id=context.metadata.get("user_id", "anonymous"),
+        )
+        trace.set_metadata({"mode": mode.value})
+        trace.set_input({"message": message})
+        trace.add_tag("mode", mode.value)
+
+        # Use trace_id from observability for consistency
+        context.trace_id = trace.trace_id
+
         logger.info(
             f"Processing message: {message!r} | mode={mode.value} | trace_id={context.trace_id}"
         )
+
+        # Create span for LLM call
+        llm_span = trace.create_span(name="llm-generate")
+        llm_span.set_input({"message": message})
 
         # Get LLM response with planned tool calls
         llm_response = await self.llm.generate(
             message=message,
             context={"history": context.conversation_history, "metadata": context.metadata},
         )
+
+        llm_span.set_output({
+            "answer": llm_response.answer,
+            "tool_calls": [
+                {"tool": tc.tool, "args": tc.args} for tc in llm_response.tool_calls
+            ],
+        })
+        llm_span.set_status("success")
+        llm_span.end()
 
         # Build plan from LLM response
         plan = [
@@ -127,7 +167,7 @@ class AgentOrchestrator:
         # Execute tools if in execute_safe mode
         actions_taken = []
         if mode == OrchestratorMode.EXECUTE_SAFE:
-            actions_taken = await self._execute_plan(plan, context)
+            actions_taken = await self._execute_plan(plan, context, trace)
 
         # Build audit information
         audit = {
@@ -151,6 +191,16 @@ class AgentOrchestrator:
             generated_script=generated_script,
         )
 
+        # Record trace output
+        trace.set_output({
+            "answer": response.answer,
+            "plan_count": len(plan),
+            "actions_count": len(actions_taken),
+        })
+
+        # Flush observability data
+        self.observability.flush()
+
         logger.info(
             f"Response generated | trace_id={context.trace_id} | "
             f"plan_size={len(plan)} | actions={len(actions_taken)}"
@@ -162,12 +212,14 @@ class AgentOrchestrator:
         self,
         plan: list[dict[str, Any]],
         context: OrchestratorContext,
+        trace: Trace | None = None,
     ) -> list[dict[str, Any]]:
         """Execute the planned tool calls.
 
         Args:
             plan: List of planned tool calls.
             context: Execution context.
+            trace: Optional trace for observability.
 
         Returns:
             List of executed actions with results.
@@ -180,8 +232,17 @@ class AgentOrchestrator:
 
             logger.info(f"Executing tool: {tool_name} | args={args} | trace_id={context.trace_id}")
 
+            # Create span for this tool call
+            tool_span = trace.create_span(name=f"tool-{tool_name}") if trace else None
+            if tool_span:
+                tool_span.set_input({"tool": tool_name, "args": args})
+
             if tool_name not in self.TOOLS:
                 logger.warning(f"Unknown tool: {tool_name}")
+                if tool_span:
+                    tool_span.set_status("error")
+                    tool_span.set_output({"error": f"Unknown tool: {tool_name}"})
+                    tool_span.end()
                 actions.append(
                     {
                         "tool": tool_name,
@@ -199,6 +260,11 @@ class AgentOrchestrator:
                 # Mark as executed in plan
                 item["executed"] = True
 
+                if tool_span:
+                    tool_span.set_status("success")
+                    tool_span.set_output({"result": result})
+                    tool_span.end()
+
                 actions.append(
                     {
                         "tool": tool_name,
@@ -211,6 +277,10 @@ class AgentOrchestrator:
 
             except Exception as e:
                 logger.error(f"Tool {tool_name} failed: {e}")
+                if tool_span:
+                    tool_span.set_status("error")
+                    tool_span.set_output({"error": str(e)})
+                    tool_span.end()
                 actions.append(
                     {
                         "tool": tool_name,
