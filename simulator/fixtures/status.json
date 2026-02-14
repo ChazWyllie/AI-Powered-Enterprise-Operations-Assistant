@@ -1,0 +1,25 @@
+{
+  "cpu": 45.2,
+  "memory": {
+    "used": 12800,
+    "total": 16384,
+    "percent": 78.1
+  },
+  "jobs": {
+    "running": 3,
+    "queued": 12,
+    "completed_today": 47,
+    "failed_today": 2
+  },
+  "subsystems": {
+    "db2": "active",
+    "cics": "active",
+    "mq": "active",
+    "jes2": "active"
+  },
+  "dasd": {
+    "volumes": 24,
+    "capacity_percent": 67.5
+  },
+  "timestamp": "2026-02-13T10:30:00Z"
+}

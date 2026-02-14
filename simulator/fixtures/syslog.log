@@ -1,0 +1,25 @@
+2026-02-13T09:00:00Z INFO  System IPL complete - z/OS 2.5
+2026-02-13T09:00:15Z INFO  JES2 initialization complete
+2026-02-13T09:00:30Z INFO  VTAM initialization complete
+2026-02-13T09:00:45Z INFO  TCP/IP stack active on TCPIP01
+2026-02-13T09:01:00Z INFO  DB2 subsystem DB2A started
+2026-02-13T09:01:15Z INFO  CICS region CICSPROD started
+2026-02-13T09:01:30Z INFO  MQ queue manager MQPROD started
+2026-02-13T09:02:00Z INFO  Automation started - CA OPS/MVS
+2026-02-13T09:05:00Z INFO  Morning batch window opened
+2026-02-13T09:05:01Z INFO  Job scheduler releasing held jobs
+2026-02-13T10:00:00Z INFO  Batch JOB001 submitted by BATCH01
+2026-02-13T10:00:05Z INFO  Batch JOB001 started execution
+2026-02-13T10:02:00Z WARN  High CPU utilization detected: 85%
+2026-02-13T10:02:30Z INFO  WLM adjusted service class priorities
+2026-02-13T10:05:00Z INFO  Batch JOB001 completed RC=0000
+2026-02-13T10:10:00Z INFO  Batch JOB002 submitted by BATCH02
+2026-02-13T10:10:05Z INFO  Batch JOB002 started execution
+2026-02-13T10:12:00Z ERROR JOB002 ABEND S0C7 in step STEP01
+2026-02-13T10:12:01Z INFO  JOB002 dumped to SYSMDUMP
+2026-02-13T10:15:00Z INFO  Batch JOB003 submitted by BATCH01
+2026-02-13T10:15:05Z INFO  Batch JOB003 started execution
+2026-02-13T10:20:00Z WARN  DASD volume VOL001 at 92% capacity
+2026-02-13T10:25:00Z INFO  SMS ACS routine triggered migration
+2026-02-13T10:30:00Z INFO  Health check completed - all subsystems OK
+2026-02-13T10:35:00Z INFO  Memory usage: 78% (12.8GB / 16GB)

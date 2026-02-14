@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-02-13
+
+### Added
+
+- **WP2 Enterprise Simulator + MCP Tools + Command Policy**
+  - Command policy engine (`app/policy.py`) with strict security guardrails:
+    - Allowlist of safe read-only commands (cat, grep, head, tail, ls, etc.)
+    - Blocklist of dangerous commands (rm, curl, bash, sudo, etc.)
+    - Shell metacharacter blocking (;, |, &, `, $(), >, <, etc.)
+    - Path jail enforcement (only `/sim/**` paths allowed)
+    - Path traversal prevention (blocks `..` sequences)
+  - MCP tools layer (`app/mcp/tools.py`) with 4 core tools:
+    - `get_logs(source, tail)` - retrieve logs from syslog, joblog, audit, error
+    - `get_system_status()` - get CPU, memory, jobs, subsystem status
+    - `run_command(command, dry_run)` - execute commands with policy enforcement
+    - `update_config(key, value)` - update configuration with sensitive key blocking
+  - Deterministic simulator fixtures:
+    - `simulator/fixtures/syslog.log` - system log entries
+    - `simulator/fixtures/joblog.log` - batch job execution logs
+    - `simulator/fixtures/audit.log` - security audit trail
+    - `simulator/fixtures/error.log` - error messages
+    - `simulator/fixtures/status.json` - system status metrics
+  - Test suite expanded: 38 policy tests + 27 MCP tools tests (65 new tests)
+
+### Security
+
+- Policy engine blocks all known dangerous commands and shell injection vectors
+- run_command defaults to `dry_run=True` for safety
+- Sensitive config keys (api_secret, password, token) blocked from update_config
+- All command validation happens before any execution attempt
+
 ## [0.1.0] - 2026-02-13
 
 ### Added
@@ -30,5 +61,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Runner container configured with: `network_mode: none`, `read_only: true`, `cap_drop: ALL`, `no-new-privileges: true`, resource limits
 
-[Unreleased]: https://github.com/ChazWyllie/AI-Powered-Enterprise-Operations-Assistant/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/ChazWyllie/AI-Powered-Enterprise-Operations-Assistant/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/ChazWyllie/AI-Powered-Enterprise-Operations-Assistant/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/ChazWyllie/AI-Powered-Enterprise-Operations-Assistant/releases/tag/v0.1.0
