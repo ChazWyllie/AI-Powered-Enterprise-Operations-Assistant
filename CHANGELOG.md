@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2025-06-13
+
+### Added
+
+- **WP7 Productization Spec + Public Demo Safety RFC**
+  - Created `docs/rfcs/2025-06-web-demo-rfc.md`:
+    - Public demo policy: plan_only enforced, execute_safe rejected (403)
+    - Environment detection via `DEMO_MODE` (public/local)
+    - Rate limiting spec: 10 req/min per IP in public mode
+    - Request size limit: 2KB max
+    - Threat model: prompt injection, tool misuse, DoS, data leakage
+    - Test plan gates for WP9, WP10, WP14
+    - Public-safe behavior policy (6 CAN-do, 6 CANNOT-do)
+    - 5 security invariants that must hold at all times
+  - Created `docs/architecture.md`:
+    - High-level system architecture diagram
+    - Component architecture (Frontend, Backend, Orchestrator, Policy, MCP, Observability)
+    - Deployment architecture for public demo vs local development
+    - Environment configuration table
+    - Data flow diagrams (plan_only and execute_safe)
+    - Security architecture: 7-layer defense in depth
+    - Trust boundary model (untrusted → semi-trusted → trusted)
+    - Test architecture summary (261 tests, 92% coverage)
+    - Technology stack reference
+
+### Documentation
+
+- RFC documents all design decisions before implementation
+- Architecture document serves as single source of truth for system design
+- Threat model identifies 4 attack categories with specific mitigations
+- Implementation sequence defined: WP7 → WP8 → ... → WP15
+
 ## [0.6.0] - 2026-02-13
 
 ### Added
