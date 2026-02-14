@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-02-14
+
+### Added
+
+- **WP9 Backend Hardening for Web Use**
+  - CORS middleware: configurable `ALLOWED_ORIGINS` (defaults to localhost:3000,5173)
+  - Rate limiting: in-memory sliding-window per-IP, configurable via `RATE_LIMIT_RPM`
+  - Request body size limit: `MAX_REQUEST_BYTES` (default 2048), returns 413
+  - `DEMO_MODE` environment variable: `public` or `local` (default)
+  - `RateLimiter` class with sliding window pruning and per-key isolation
+  - 15 backend hardening tests (`test_web_hardening.py`):
+    - CORS: allowed origin succeeds, disallowed origin rejected
+    - Validation: invalid mode 422, empty message 422, missing fields 422, valid 200
+    - Rate limiting: within limit, over limit, disabled when zero, 429 on endpoint, per-IP
+    - Request size: oversized 413, normal passes
+    - Configuration: DEMO_MODE default, RateLimiter initialization
+
+### Changed
+
+- Updated `test_security_boundaries.py`: very long message now expects 413 (WP9 size limit)
+- Backend version bumped to 0.9.0
+- Test count: 261 → 276 (+15)
+
 ## [0.8.0] - 2026-02-14
 
 ### Added

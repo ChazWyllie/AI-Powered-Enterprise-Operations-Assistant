@@ -109,14 +109,14 @@ class TestAPIErrorSurface:
         assert response.status_code == 200
 
     async def test_very_long_message_handled(self, async_client):
-        """Very long messages don't crash the server."""
+        """Very long messages are rejected by request size limit (WP9)."""
         async with async_client as client:
             response = await client.post(
                 "/chat",
                 json={"message": "x" * 10000, "mode": "plan_only"},
             )
-        # Should return 200 (stub handles any message)
-        assert response.status_code == 200
+        # WP9: request size limit rejects oversized payloads
+        assert response.status_code == 413
 
     async def test_special_characters_in_message(self, async_client):
         """Special characters in message don't break JSON."""
