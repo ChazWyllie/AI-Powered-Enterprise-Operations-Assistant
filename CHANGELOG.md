@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-02-13
+
+### Added
+
+- **WP4 FastAPI Integration**
+  - `POST /chat` endpoint with full orchestration integration
+  - Pydantic request/response models:
+    - `ChatRequest` with message and mode fields
+    - `ChatResponse` with answer, plan, actions_taken, script, audit
+    - `ChatMode` enum: plan_only, execute_safe
+    - `AuditInfo` with trace_id and mode tracking
+  - Input validation:
+    - Required message field with min_length=1
+    - Required mode enum with valid values only
+    - Whitespace-only message rejection
+  - End-to-end integration: API → Orchestrator → MCP Tools
+  - Test suite expanded: 18 API integration tests (103 total tests)
+
+### API
+
+- `GET /health` - Returns `{"status": "ok"}` (unchanged from WP1)
+- `POST /chat` - Process user message through AI agent
+  - Request: `{"message": "...", "mode": "plan_only|execute_safe"}`
+  - Response: `{"answer": "...", "plan": [...], "actions_taken": [...], "audit": {...}}`
+
 ## [0.3.0] - 2026-02-13
 
 ### Added
