@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: enterprise-ops-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: DEMO_MODE
+        value: public
+      - key: ALLOWED_ORIGINS
+        value: https://enterprise-ops.vercel.app
+      - key: RATE_LIMIT_RPM
+        value: "10"
+      - key: MAX_REQUEST_BYTES
+        value: "2048"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: LANGFUSE_PUBLIC_KEY
+        sync: false
+      - key: LANGFUSE_SECRET_KEY
+        sync: false
+      - key: LANGFUSE_HOST
+        value: https://cloud.langfuse.com
+    healthCheckPath: /health
+    plan: free

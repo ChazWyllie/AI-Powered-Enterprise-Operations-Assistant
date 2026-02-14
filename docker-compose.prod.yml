@@ -1,0 +1,38 @@
+# Production-ready docker-compose for the full deployment stack.
+# Usage: docker compose -f docker-compose.prod.yml up -d
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DEMO_MODE=public
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://enterprise-ops.vercel.app}
+      - RATE_LIMIT_RPM=10
+      - MAX_REQUEST_BYTES=2048
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
+      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
+      - LANGFUSE_HOST=${LANGFUSE_HOST:-https://cloud.langfuse.com}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+    # Security: drop capabilities
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-02-14
+
+### Added
+
+- **WP11 Deployment Architecture**
+  - `render.yaml` blueprint for one-click Render deployment
+  - `docker-compose.prod.yml` for self-hosted production deployment
+  - `scripts/smoke-test.sh` for production validation (health, chat, structure, errors)
+  - `docs/deployment.md` with Render, Vercel, and Docker Compose guides
+  - Updated `docker-compose.yml` with WP9/WP10 environment variables
+  - 8 smoke tests (`test_smoke.py`):
+    - Health endpoint, chat plan_only, response structure, validation errors
+    - Trace ID presence, plan_only no actions, health format
+
+### Changed
+
+- Test count: 286 → 294 (+8)
+
 ## [0.10.0] - 2026-02-14
 
 ### Added

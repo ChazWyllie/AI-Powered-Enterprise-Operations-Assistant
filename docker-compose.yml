@@ -8,6 +8,10 @@ services:
     ports:
       - "8000:8000"
     environment:
+      - DEMO_MODE=${DEMO_MODE:-local}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}
+      - RATE_LIMIT_RPM=${RATE_LIMIT_RPM:-0}
+      - MAX_REQUEST_BYTES=${MAX_REQUEST_BYTES:-2048}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
       - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
