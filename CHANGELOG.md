@@ -7,6 +7,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-02-13
+
+### Added
+
+- **WP6 AI-Based TDD + Vibe Coding Evidence**
+  - Security boundary test suite (`test_security_boundaries.py`):
+    - Shell injection vectors: newline, carriage return, semicolons
+    - Environment variable expansion blocking
+    - Subshell, heredoc, process substitution blocking
+    - Path traversal and jail escape attempts
+    - API error surface tests (no stack traces leak)
+    - Dangerous request safe handling
+  - LLM coverage tests (`test_llm_coverage.py`):
+    - OpenAILLM initialization, lazy client, env key fallback
+    - Mock-based tests for generate (success, tool calls, empty content, API error fallback)
+    - System prompt and tool definition validation
+    - LLMStub pattern matching: config intents, log sources, command types
+  - MCP tools coverage tests (`test_mcp_tools_coverage.py`):
+    - Simulated log fallback for all sources
+    - Command execution paths: echo actual, simulated, blocked
+    - _simulate_command_execution for all command types
+    - Config edge cases: whitespace keys, sensitive key blocking
+  - Observability coverage tests (`test_observability_coverage.py`):
+    - Span/Generation/Trace method coverage with and without Langfuse
+    - Langfuse client initialization: no credentials, import error, missing SDK
+    - Factory function branches: mock flag, env config, fallback
+  - Orchestrator coverage tests (`test_orchestrator_coverage.py`):
+    - Execute-safe mode: status, logs, commands, config
+    - Answer building for all tool result types
+    - Script generation: single/multiple commands, empty, no commands
+    - Initialization variants
+
+### Changed
+
+- CI pipeline now enforces 80% minimum coverage via `--cov-fail-under=80`
+- Added `pytest-cov` to `requirements.txt`
+- README updated with demo prompts section and accurate test counts
+
+### Metrics
+
+- Test suite: 126 → 261 tests (+135 new tests)
+- Line coverage: 78% → 92% (+14 percentage points)
+- All 6 work packages complete
+
 ## [0.5.0] - 2026-02-13
 
 ### Added

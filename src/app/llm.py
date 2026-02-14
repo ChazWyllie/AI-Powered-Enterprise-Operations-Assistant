@@ -103,7 +103,9 @@ class LLMStub(LLMInterface):
     }
 
     async def generate(
-        self, message: str, context: dict[str, Any] | None = None  # noqa: ARG002
+        self,
+        message: str,
+        context: dict[str, Any] | None = None,  # noqa: ARG002
     ) -> LLMResponse:
         """Generate deterministic response based on message patterns.
 
@@ -126,8 +128,7 @@ class LLMStub(LLMInterface):
         if "dangerous" in intents:
             # For dangerous requests, acknowledge but don't plan harmful actions
             answer_parts.append(
-                "I cannot execute destructive operations. "
-                "I'll check the current status instead."
+                "I cannot execute destructive operations. I'll check the current status instead."
             )
             tool_calls.append(
                 ToolCall(
@@ -192,9 +193,7 @@ class LLMStub(LLMInterface):
                     reasoning="Default action: check system status",
                 )
             )
-            answer_parts.append(
-                "I'll check the system status to help answer your question."
-            )
+            answer_parts.append("I'll check the system status to help answer your question.")
 
         answer = " ".join(answer_parts)
 

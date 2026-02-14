@@ -185,10 +185,13 @@ class TestLangfuseClientConfiguration:
     def test_client_requires_config_or_env(self):
         """Langfuse client can be configured via params or env."""
         # Mock environment to avoid needing real credentials
-        with patch.dict("os.environ", {
-            "LANGFUSE_PUBLIC_KEY": "pk-test",
-            "LANGFUSE_SECRET_KEY": "sk-test",
-        }):
+        with patch.dict(
+            "os.environ",
+            {
+                "LANGFUSE_PUBLIC_KEY": "pk-test",
+                "LANGFUSE_SECRET_KEY": "sk-test",
+            },
+        ):
             # Should not raise when env vars are set
             client = LangfuseObservabilityClient()
             assert client is not None

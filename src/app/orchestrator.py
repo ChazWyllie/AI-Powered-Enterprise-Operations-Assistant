@@ -144,12 +144,14 @@ class AgentOrchestrator:
             context={"history": context.conversation_history, "metadata": context.metadata},
         )
 
-        llm_span.set_output({
-            "answer": llm_response.answer,
-            "tool_calls": [
-                {"tool": tc.tool, "args": tc.args} for tc in llm_response.tool_calls
-            ],
-        })
+        llm_span.set_output(
+            {
+                "answer": llm_response.answer,
+                "tool_calls": [
+                    {"tool": tc.tool, "args": tc.args} for tc in llm_response.tool_calls
+                ],
+            }
+        )
         llm_span.set_status("success")
         llm_span.end()
 
@@ -192,11 +194,13 @@ class AgentOrchestrator:
         )
 
         # Record trace output
-        trace.set_output({
-            "answer": response.answer,
-            "plan_count": len(plan),
-            "actions_count": len(actions_taken),
-        })
+        trace.set_output(
+            {
+                "answer": response.answer,
+                "plan_count": len(plan),
+                "actions_count": len(actions_taken),
+            }
+        )
 
         # Flush observability data
         self.observability.flush()

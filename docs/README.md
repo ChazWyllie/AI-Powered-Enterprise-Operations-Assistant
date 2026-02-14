@@ -19,10 +19,10 @@ A portfolio-grade AI systems project that integrates:
 | WP2 Simulator + MCP + Policy | ✅ Complete | Enterprise simulator, MCP tools, security policy engine |
 | WP3 Agent Orchestration | ✅ Complete | LLM interface, orchestrator with plan/execute modes |
 | WP4 API Integration | ✅ Complete | `/chat` endpoint with full orchestration integration |
-| WP5 Langfuse Observability | 🔲 Not Started | Tracing, metrics, and observability integration |
-| WP6 AI-based TDD | 🔲 Not Started | Test-driven development workflow automation |
+| WP5 Langfuse Observability | ✅ Complete | Tracing, metrics, and observability integration |
+| WP6 AI-based TDD | ✅ Complete | Security boundary tests, 92% coverage, CI enforcement |
 
-**Test Coverage:** 103 tests passing
+**Test Coverage:** 261 tests passing, 92% line coverage (80% enforced in CI)
 
 ## API Endpoints
 
@@ -94,7 +94,7 @@ A portfolio-grade AI systems project that integrates:
 │   ├── llm.py         # LLM interface
 │   ├── policy.py      # Security policy engine
 │   └── mcp/tools.py   # MCP tool implementations
-├── tests/             # Pytest suite (103 tests)
+├── tests/             # Pytest suite (261 tests, 92% coverage)
 ├── simulator/fixtures/ # Deterministic test data
 ├── docs/              # Architecture + RFCs
 ├── prompts/           # Reusable agentic templates
@@ -108,6 +108,9 @@ A portfolio-grade AI systems project that integrates:
 # Run tests
 pytest
 
+# Run tests with coverage
+pytest --cov=app --cov-report=term-missing --cov-fail-under=80
+
 # Start with Docker
 docker compose up
 
@@ -115,11 +118,48 @@ docker compose up
 ruff check src tests
 ```
 
+## Demo Prompts
+
+Try these with the `/chat` endpoint to see different capabilities:
+
+```bash
+# 1. System status check (plan_only)
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "What is the current system status?", "mode": "plan_only"}'
+
+# 2. Log analysis (execute_safe)
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Show me recent error logs", "mode": "execute_safe"}'
+
+# 3. Multi-tool orchestration (execute_safe)
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Check CPU and memory, then show the syslog", "mode": "execute_safe"}'
+
+# 4. Safe command execution (plan_only — dry run)
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "List files in the simulator directory", "mode": "plan_only"}'
+
+# 5. Configuration update (execute_safe)
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Set the log level to debug", "mode": "execute_safe"}'
+
+# 6. Security boundary test — dangerous request is safely handled
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Delete all system files", "mode": "execute_safe"}'
+```
+
 ## Tech Stack
 
 - **Python 3.11** + FastAPI + Pydantic
 - **OpenAI GPT-4** (with tool calling)
+- **Langfuse** (observability + tracing)
 - **Docker** (sandbox runner with security hardening)
-- **Pytest** + httpx (testing)
-- **Ruff** (linting)
-- **GitHub Actions** (CI/CD)
+- **Pytest** + httpx + pytest-cov (testing, 92% coverage)
+- **Ruff** (linting + formatting)
+- **GitHub Actions** (CI/CD with coverage enforcement)
