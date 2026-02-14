@@ -1,11 +1,25 @@
 # AI-Powered Enterprise Operations Assistant
 
-> An AI agent that automates IBM Z / enterprise mainframe operations using LLM tool-calling, a Model Context Protocol (MCP) server layer, and a security-hardened Docker sandbox.
+> An AI agent that automates IBM Z / enterprise mainframe operations using LLM tool-calling, a Model Context Protocol (MCP) server layer, and a security-hardened Docker sandbox — with a React web UI for interactive demos.
 
 ![Python 3.11](https://img.shields.io/badge/python-3.11-blue)
-![Tests](https://img.shields.io/badge/tests-261%20passing-brightgreen)
+![React 19](https://img.shields.io/badge/react-19-61DAFB)
+![Tests](https://img.shields.io/badge/tests-323%20passing-brightgreen)
 ![Coverage](https://img.shields.io/badge/coverage-92%25-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
+
+---
+
+## Why It Matters
+
+Enterprise AI isn't just about calling an LLM — it's about **trust boundaries, auditability, and safe execution**. This project demonstrates production-grade patterns that enterprises demand:
+
+- An LLM agent that can **plan** dangerous operations without executing them
+- A security policy engine that blocks shell injection, path traversal, and destructive commands **before** they reach the sandbox
+- Full observability — every LLM call, tool execution, and policy decision is traced
+- A public demo mode that guarantees **read-only behavior** for internet-facing deployments
+
+**If you're hiring for AI engineering, platform engineering, or DevOps roles**, this project shows the full stack: from React frontend → FastAPI backend → LLM orchestration → sandboxed tool execution → production deployment.
 
 ---
 
@@ -18,7 +32,9 @@ This project is a portfolio-grade AI systems build that demonstrates end-to-end 
 - **Security Policy Engine** — Command allowlist/blocklist, path jail (`/sim/**`), metacharacter injection blocking
 - **Observability** — Langfuse tracing with spans for every LLM call, tool execution, and API request
 - **Sandbox Isolation** — Docker runner with no network, read-only filesystem, dropped capabilities
-- **AI-Based TDD** — 261 tests, 92% coverage, CI-enforced quality gates
+- **React Web UI** — Interactive chat interface, demo page with preset prompts, security documentation
+- **Production Hardening** — CORS, rate limiting, request size limits, public demo mode gate
+- **AI-Based TDD** — 323 tests (294 backend + 29 frontend), 92% coverage, CI-enforced quality gates
 
 ## Project Status
 
@@ -30,6 +46,12 @@ This project is a portfolio-grade AI systems build that demonstrates end-to-end 
 | WP4 API Integration | ✅ Complete | v0.4.0 | `/chat` endpoint, Pydantic models, 18 tests |
 | WP5 Langfuse Observability | ✅ Complete | v0.5.0 | Trace/span/generation tracking, 23 tests |
 | WP6 AI-Based TDD | ✅ Complete | v0.6.0 | Security boundary tests, 92% coverage |
+| WP7 Productization RFC | ✅ Complete | v0.7.0 | RFC, architecture docs, threat model |
+| WP8 Frontend UI MVP | ✅ Complete | v0.8.0 | React + Vite + TypeScript SPA, 29 tests |
+| WP9 Backend Web Hardening | ✅ Complete | v0.9.0 | CORS, rate limiting, request size limits |
+| WP10 Public Demo Mode Gate | ✅ Complete | v0.10.0 | execute_safe blocked in public mode |
+| WP11 Deployment Architecture | ✅ Complete | v0.11.0 | Render/Vercel deploy, smoke tests |
+| WP12 Portfolio Docs + Demo | ✅ Complete | v0.12.0 | Portfolio-grade README, demo content |
 
 ## Quick Start
 
@@ -80,6 +102,10 @@ curl http://localhost:8000/health
 | `LANGFUSE_PUBLIC_KEY` | No | — | Langfuse public key for tracing |
 | `LANGFUSE_SECRET_KEY` | No | — | Langfuse secret key for tracing |
 | `LANGFUSE_HOST` | No | `https://cloud.langfuse.com` | Langfuse host URL |
+| `DEMO_MODE` | No | `local` | `public` (plan_only enforced, rate limits) or `local` (full access) |
+| `ALLOWED_ORIGINS` | No | `http://localhost:3000,http://localhost:5173` | CORS allowed origins (comma-separated) |
+| `RATE_LIMIT_RPM` | No | `30` | Requests per minute per IP address |
+| `MAX_REQUEST_BYTES` | No | `2048` | Maximum request body size in bytes |
 
 ## API Reference
 
@@ -141,32 +167,39 @@ Process a user message through the AI agent orchestrator.
 ## Architecture
 
 ```
-                         ┌──────────────────────────┐
-                         │      FastAPI Server       │
-                         │  /health    POST /chat    │
-                         └────────────┬─────────────┘
-                                      │
-                         ┌────────────▼─────────────┐
-                         │    Agent Orchestrator     │
-                         │  plan_only │ execute_safe │
-                         └──┬─────────┬──────────┬──┘
-                            │         │          │
-               ┌────────────▼──┐  ┌───▼────┐  ┌──▼──────────────┐
-               │  LLM Layer    │  │ Policy │  │ Observability   │
-               │  GPT-4/Stub   │  │ Engine │  │ Langfuse/Mock   │
-               └───────────────┘  └───┬────┘  └─────────────────┘
-                                      │
-                         ┌────────────▼─────────────┐
-                         │       MCP Tool Layer      │
-                         │  get_logs  │ get_status   │
-                         │  run_cmd   │ update_cfg   │
-                         └────────────┬─────────────┘
-                                      │
-                         ┌────────────▼─────────────┐
-                         │   Simulator / Fixtures    │
-                         │  syslog, joblog, audit,   │
-                         │  error, status.json       │
-                         └──────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                     React SPA (Vite)                         │
+│  ChatPage │ DemoPage │ AboutPage │ SecurityPage              │
+│  Dark theme • Mobile responsive • Mode toggle                │
+└──────────────────────┬───────────────────────────────────────┘
+                       │  /api proxy (dev) or direct (prod)
+┌──────────────────────▼───────────────────────────────────────┐
+│                      FastAPI Server                          │
+│  CORS │ Rate Limiter │ Size Limit │ Demo Mode Gate           │
+│  GET /health                POST /chat                       │
+└──────────────────────┬───────────────────────────────────────┘
+                       │
+          ┌────────────▼─────────────┐
+          │    Agent Orchestrator     │
+          │  plan_only │ execute_safe │
+          └──┬─────────┬──────────┬──┘
+             │         │          │
+┌────────────▼──┐  ┌───▼────┐  ┌──▼──────────────┐
+│  LLM Layer    │  │ Policy │  │ Observability   │
+│  GPT-4/Stub   │  │ Engine │  │ Langfuse/Mock   │
+└───────────────┘  └───┬────┘  └─────────────────┘
+                       │
+          ┌────────────▼─────────────┐
+          │       MCP Tool Layer      │
+          │  get_logs  │ get_status   │
+          │  run_cmd   │ update_cfg   │
+          └────────────┬─────────────┘
+                       │
+          ┌────────────▼─────────────┐
+          │   Simulator / Fixtures    │
+          │  syslog, joblog, audit,   │
+          │  error, status.json       │
+          └──────────────────────────┘
 ```
 
 ### Execution Modes
@@ -187,6 +220,18 @@ Process a user message through the AI agent orchestrator.
 
 ## Security
 
+### 7-Layer Defense in Depth
+
+| Layer | Protection |
+|---|---|
+| 1. CORS | Origin allowlist — only configured frontends can call the API |
+| 2. Rate Limiting | Per-IP sliding window (default 30 req/min) — blocks abuse |
+| 3. Request Size | Body limit (default 2KB) — blocks payload bombs |
+| 4. Demo Mode Gate | `DEMO_MODE=public` → execute_safe returns 403 Forbidden |
+| 5. Input Validation | Pydantic models reject empty/invalid messages |
+| 6. Policy Engine | Command allowlist, blocklist, metacharacter blocking, path jail |
+| 7. Docker Sandbox | No network, read-only FS, dropped capabilities, non-root |
+
 ### Policy Engine
 
 - **Allowlist**: Only `cat`, `ls`, `head`, `tail`, `grep`, `echo`, `date`, `hostname`, `wc` permitted
@@ -202,6 +247,70 @@ Process a user message through the AI agent orchestrator.
 - All capabilities dropped (`cap_drop: ALL`)
 - No privilege escalation (`no-new-privileges`)
 - Resource limits enforced
+
+### Public Demo Mode
+
+When `DEMO_MODE=public`, the system enforces read-only behavior:
+- `execute_safe` mode is **blocked** — returns 403 Forbidden
+- Only `plan_only` mode is allowed — LLM generates plans without executing tools
+- Policy engine remains active in all modes (blocks dangerous requests even in plan_only)
+- Rate limiting protects against abuse
+
+## Frontend
+
+The React SPA provides an interactive interface for exploring the AI agent:
+
+### Pages
+
+| Route | Page | Description |
+|---|---|---|
+| `/` | Chat | Free-form chat with mode toggle (plan_only / execute_safe) |
+| `/demo` | Demo | 6 preset prompts that showcase key capabilities |
+| `/about` | About | Project overview and technical details |
+| `/security` | Security | Security model documentation |
+
+### Running the Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev          # → http://localhost:5173 (proxies /api → :8000)
+npm test             # Run 29 component + API tests
+npm run build        # Production build
+```
+
+### Demo Page Prompts
+
+The `/demo` page offers one-click prompts that demonstrate:
+
+1. **System Health Check** — `get_system_status` tool planning
+2. **Error Log Analysis** — `get_logs` tool with source filtering
+3. **Multi-Tool Orchestration** — CPU/memory + syslog in one query
+4. **File Listing** — `run_command` with path jail enforcement
+5. **Configuration Change** — `update_config` with sensitive key blocking
+6. **Security Boundary** — Dangerous request → safe plan (no execution)
+
+## Deployment
+
+### One-Click Deploy
+
+| Platform | Type | Config |
+|---|---|---|
+| **Render** | Backend API | `render.yaml` — auto-builds from repo |
+| **Vercel** | Frontend SPA | Connect repo → set output `frontend/dist` |
+| **Docker** | Self-hosted | `docker-compose.prod.yml` with full hardening |
+
+### Production Docker
+
+```bash
+# Production stack with security hardening
+docker compose -f docker-compose.prod.yml up
+
+# Run smoke tests
+bash scripts/smoke-test.sh http://localhost:8000
+```
+
+See [`docs/deployment.md`](deployment.md) for detailed deployment guides.
 
 ## Demo Prompts
 
@@ -241,7 +350,9 @@ curl -s -X POST http://localhost:8000/chat \
 
 ## Testing
 
-261 tests across 12 test files covering:
+323 tests across 18 test files (294 backend + 29 frontend):
+
+### Backend Tests (Python — pytest)
 
 | Category | Tests | Files |
 |---|---|---|
@@ -253,6 +364,18 @@ curl -s -X POST http://localhost:8000/chat \
 | Observability | 23 + 32 | `test_observability.py`, `test_observability_coverage.py` |
 | LLM interface | 27 | `test_llm_coverage.py` |
 | Security boundaries | 30 | `test_security_boundaries.py` |
+| Web hardening | 15 | `test_web_hardening.py` |
+| Demo mode gate | 10 | `test_demo_mode_gate.py` |
+| Smoke tests | 8 | `test_smoke.py` |
+
+### Frontend Tests (TypeScript — Vitest)
+
+| Category | Tests | Files |
+|---|---|---|
+| Chat input component | 8 | `ChatInput.test.tsx` |
+| Response renderer | 10 | `ResponseRenderer.test.tsx` |
+| Error display | 3 | `ErrorDisplay.test.tsx` |
+| API client | 8 | `api.test.ts` |
 
 **Coverage by module:**
 
@@ -270,24 +393,38 @@ curl -s -X POST http://localhost:8000/chat \
 
 ```
 ├── src/app/               # Application source code
-│   ├── main.py            # FastAPI app, /health + /chat endpoints
+│   ├── main.py            # FastAPI app, middleware, /health + /chat
 │   ├── orchestrator.py    # Agent orchestrator (plan/execute modes)
 │   ├── llm.py             # LLM interface (OpenAI + deterministic stub)
 │   ├── policy.py          # Security policy engine
 │   ├── observability.py   # Langfuse tracing integration
 │   └── mcp/tools.py       # MCP tool implementations
-├── tests/                 # 261 tests (92% coverage)
+├── frontend/              # React SPA (Vite + TypeScript)
+│   ├── src/
+│   │   ├── api/client.ts       # Typed API client (chat, health)
+│   │   ├── components/         # ChatInput, ResponseRenderer, ErrorDisplay
+│   │   ├── pages/              # ChatPage, DemoPage, AboutPage, SecurityPage
+│   │   ├── types/chat.ts       # TypeScript interfaces
+│   │   └── App.tsx             # Router + navigation + dark theme
+│   └── package.json            # React 19, Vite 6, Vitest
+├── tests/                 # 294 backend tests (92% coverage)
 ├── simulator/fixtures/    # Deterministic log + status data
-├── docs/                  # Architecture, checklists, workflow practices
+├── docs/                  # Architecture, RFC, deployment, checklists
+│   ├── architecture.md         # Full architecture documentation
+│   ├── deployment.md           # Render / Vercel / Docker deploy guide
+│   └── rfcs/                   # Productization RFC + threat model
+├── scripts/smoke-test.sh  # Production smoke tests
 ├── prompts/               # Reusable agentic prompt templates
 ├── agents/                # Planner / implementer / reviewer roles
 ├── .github/workflows/     # CI: lint → test (80%+ coverage) → docker
 ├── Dockerfile             # API container (Python 3.11-slim)
 ├── Dockerfile.runner      # Sandbox runner (security-hardened)
-├── docker-compose.yml     # Multi-container orchestration
+├── docker-compose.yml     # Development multi-container orchestration
+├── docker-compose.prod.yml # Production compose with hardening
+├── render.yaml            # Render one-click deployment blueprint
 ├── requirements.txt       # Python dependencies
 ├── pyproject.toml         # Ruff + pytest config
-└── CHANGELOG.md           # Versioned changelog (v0.1.0 → v0.6.0)
+└── CHANGELOG.md           # Versioned changelog (v0.1.0 → v0.12.0)
 ```
 
 ## CI/CD Pipeline
@@ -307,14 +444,17 @@ curl -s -X POST http://localhost:8000/chat \
 
 | Layer | Technology |
 |---|---|
-| Language | Python 3.11 |
+| Language | Python 3.11, TypeScript 5.7 |
 | API Framework | FastAPI + Pydantic v2 |
+| Frontend | React 19 + Vite 6 + React Router v7 |
 | LLM | OpenAI GPT-4 (tool calling) |
 | Observability | Langfuse (traces, spans, generations) |
 | Containerization | Docker + Docker Compose |
-| Testing | pytest, pytest-asyncio, pytest-cov, httpx |
-| Linting | Ruff (check + format) |
+| Backend Testing | pytest, pytest-asyncio, pytest-cov, httpx |
+| Frontend Testing | Vitest, React Testing Library, jsdom |
+| Linting | Ruff (Python), TypeScript strict mode |
 | CI/CD | GitHub Actions |
+| Deployment | Render (backend), Vercel (frontend) |
 
 ## License
 

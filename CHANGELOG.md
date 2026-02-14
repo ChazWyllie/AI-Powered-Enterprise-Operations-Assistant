@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-02-14
+
+### Added
+
+- **WP12 Portfolio Docs + Demo Content**
+  - Portfolio-grade README rewrite with "Why It Matters" recruiter statement
+  - 7-layer defense in depth security documentation
+  - Frontend section with pages, routes, and demo prompt descriptions
+  - Deployment section with one-click deploy matrix (Render/Vercel/Docker)
+  - Updated architecture diagram showing full stack (React → FastAPI → LLM → MCP)
+  - WP7–WP12 added to project status table
+  - New environment variables documented (DEMO_MODE, ALLOWED_ORIGINS, RATE_LIMIT_RPM, MAX_REQUEST_BYTES)
+  - Updated test summary: 323 tests (294 backend + 29 frontend) across 18 files
+  - Updated repo structure reflecting frontend/, deployment configs, and scripts/
+  - Updated tech stack table with frontend technologies and deployment platforms
+
 ## [0.11.0] - 2026-02-14
 
 ### Added
