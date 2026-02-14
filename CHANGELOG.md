@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-02-14
+
+### Added
+
+- **WP8 Frontend UI Skeleton (Website MVP)**
+  - React + Vite + TypeScript SPA (`frontend/`)
+  - Pages: `/` (Chat), `/demo` (Interactive Demo), `/about`, `/security`
+  - Components:
+    - `ChatInput`: textarea + mode toggle (plan_only / execute_safe) + send button
+    - `ResponseRenderer`: structured display of answer, plan, actions, script, audit
+    - `ErrorDisplay`: error alert panel with accessibility role
+  - API client layer (`src/api/client.ts`):
+    - `sendChatMessage()`: POST /chat with typed request/response
+    - `checkHealth()`: GET /health availability check
+  - Type definitions (`src/types/chat.ts`):
+    - ChatRequest, ChatResponse, PlanStep, ActionResult, AuditInfo, ApiError
+  - Demo page with 6 preset prompts for guided exploration
+  - Security page documenting defense-in-depth model
+  - Dark theme UI with responsive mobile layout
+  - Vite dev proxy `/api` → `localhost:8000` for local development
+  - Test suite: 29 frontend tests across 4 test files:
+    - ChatInput: send triggers fetch, mode toggle, loading states, empty validation
+    - ResponseRenderer: all sections, missing fields, error badges, singular/plural
+    - ErrorDisplay: null, message rendering, accessibility
+    - API client: fetch calls, mode payload, error handling, health check
+
+### Technical
+
+- Vite 6 + React 19 + TypeScript 5.7
+- Vitest + Testing Library + jsdom for component testing
+- React Router v7 for client-side navigation
+- CSS custom properties for theming
+
 ## [0.7.0] - 2025-06-13
 
 ### Added

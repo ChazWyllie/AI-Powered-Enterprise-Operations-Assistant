@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Dev
+.vite/
+*.local
+
+# Coverage
+coverage/
+
+# IDE
+.vscode/
+.idea/
