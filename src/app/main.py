@@ -192,6 +192,13 @@ async def chat(request: ChatRequest, raw_request: Request) -> ChatResponse:
     if not rate_limiter.is_allowed(client_ip):
         raise HTTPException(status_code=429, detail="Rate limit exceeded")
 
+    # Demo mode gate (WP10): reject execute_safe in public mode
+    if DEMO_MODE == "public" and request.mode == ChatMode.EXECUTE_SAFE:
+        raise HTTPException(
+            status_code=403,
+            detail="execute_safe is not available in public demo mode",
+        )
+
     logger.info(f"Processing chat request: mode={request.mode}, message={request.message!r}")
 
     # Map API mode to orchestrator mode

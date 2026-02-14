@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-02-14
+
+### Added
+
+- **WP10 Public Demo Mode Gate**
+  - `DEMO_MODE=public` rejects execute_safe requests with 403 Forbidden
+  - Clear error message: "execute_safe is not available in public demo mode"
+  - `DEMO_MODE=local` allows execute_safe (default behavior preserved)
+  - CommandPolicy enforcement remains active in ALL modes
+  - 10 demo mode gate tests (`test_demo_mode_gate.py`):
+    - Public: execute_safe rejected 403, plan_only allowed 200, clear error message
+    - Local: execute_safe allowed 200, plan_only allowed 200
+    - Policy: rm blocked in both modes, shell injection blocked, path traversal blocked
+    - Dangerous requests in plan_only still return valid plan
+
+### Changed
+
+- Test count: 276 → 286 (+10)
+
 ## [0.9.0] - 2026-02-14
 
 ### Added
