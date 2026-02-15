@@ -4,6 +4,7 @@ FastAPI application providing:
 - /health endpoint for service health checks
 - /chat endpoint for AI-powered operations assistance (WP4)
 - CORS, rate limiting, request size validation (WP9)
+- Observability trace surfacing (WP13)
 """
 
 import logging
@@ -18,6 +19,7 @@ from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, field_validator
 
+from app.observability import get_observability_client
 from app.orchestrator import AgentOrchestrator, OrchestratorMode
 
 # Configure structured logging
@@ -70,6 +72,7 @@ class HealthResponse(BaseModel):
     """Health check response model."""
 
     status: str
+    observability: str = "disabled"
 
 
 class ChatMode(str, Enum):
@@ -125,7 +128,7 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(
     title="AI Enterprise Operations Assistant",
     description="AI-powered assistant for IBM Z / enterprise infrastructure operations",
-    version="0.9.0",
+    version="0.13.0",
     lifespan=lifespan,
 )
 
@@ -140,9 +143,18 @@ app.add_middleware(
     allow_headers=["Content-Type"],
 )
 
-# Initialize orchestrator with LLMStub for deterministic behavior
-# Set use_stub=False and provide api_key for production OpenAI usage
-orchestrator = AgentOrchestrator(use_stub=True)
+# Initialize observability client (WP13)
+# Uses Langfuse when LANGFUSE_PUBLIC_KEY + LANGFUSE_SECRET_KEY are set,
+# otherwise falls back to mock client.
+USE_LLM_STUB = os.environ.get("OPENAI_API_KEY") is None
+obs_client = get_observability_client(use_mock=USE_LLM_STUB)
+
+# Initialize orchestrator
+# Uses LLMStub when no OPENAI_API_KEY, real OpenAI otherwise.
+orchestrator = AgentOrchestrator(
+    use_stub=USE_LLM_STUB,
+    observability_client=obs_client,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -168,17 +180,28 @@ async def health_check() -> HealthResponse:
 
     Returns:
         HealthResponse with status "ok" when service is healthy.
+        Includes observability status: "langfuse", "mock", or "disabled".
     """
-    return HealthResponse(status="ok")
+    from app.observability import LangfuseObservabilityClient, MockObservabilityClient
+
+    if isinstance(obs_client, LangfuseObservabilityClient):
+        obs_status = "langfuse" if obs_client._langfuse else "disabled"
+    elif isinstance(obs_client, MockObservabilityClient):
+        obs_status = "mock"
+    else:
+        obs_status = "disabled"
+
+    return HealthResponse(status="ok", observability=obs_status)
 
 
 @app.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest, raw_request: Request) -> ChatResponse:
+async def chat(request: ChatRequest, raw_request: Request, response: Response) -> ChatResponse:
     """Process a chat message through the AI agent.
 
     Args:
         request: ChatRequest with message and mode.
         raw_request: Raw HTTP request for IP-based rate limiting.
+        response: Response object for setting headers (X-Trace-Id).
 
     Returns:
         ChatResponse with answer, plan, actions_taken, and audit info.
@@ -216,7 +239,7 @@ async def chat(request: ChatRequest, raw_request: Request) -> ChatResponse:
         )
 
         # Build response
-        return ChatResponse(
+        chat_response = ChatResponse(
             answer=result.answer,
             plan=result.plan,
             actions_taken=result.actions_taken,
@@ -226,6 +249,11 @@ async def chat(request: ChatRequest, raw_request: Request) -> ChatResponse:
                 mode=result.audit.get("mode", request.mode.value),
             ),
         )
+
+        # Surface trace ID as HTTP header for debugging (WP13)
+        response.headers["X-Trace-Id"] = result.audit.get("trace_id", "")
+
+        return chat_response
 
     except Exception as e:
         logger.error(f"Error processing chat request: {e}")

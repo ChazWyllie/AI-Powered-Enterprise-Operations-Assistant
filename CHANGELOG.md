@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-02-14
+
+### Added
+
+- **WP13 Observability Production**
+  - `X-Trace-Id` response header on all `/chat` responses for debugging
+  - Health endpoint now reports `observability` status (`langfuse`, `mock`, or `disabled`)
+  - Environment-driven observability client: Langfuse when keys set, mock otherwise
+  - Environment-driven LLM selection: OpenAI when `OPENAI_API_KEY` set, stub otherwise
+  - 17 observability production tests (`test_observability_production.py`):
+    - Trace ID presence (4): in audit, valid UUID, unique per request, in execute_safe
+    - X-Trace-Id header (3): present, matches body, absent on health
+    - Health observability (2): includes field, reports mock when no Langfuse
+    - Client selection (4): mock explicit, Langfuse when env set, fallback
+    - Trace spans (4): mock records, child spans, span lifecycle, generation tokens
+
+### Changed
+
+- `main.py`: App version → 0.13.0
+- `main.py`: Orchestrator uses env-driven observability client (not hardcoded stub)
+- Health endpoint response now includes `observability` field
+- Test count: 294 → 311 (+17)
+
 ## [0.12.0] - 2026-02-14
 
 ### Added

@@ -88,7 +88,8 @@ class TestSmokeTests:
         async with production_client as client:
             resp = await client.get("/health")
             data = resp.json()
-            assert data == {"status": "ok"}
+            assert data["status"] == "ok"
+            assert "observability" in data
 
     @pytest.mark.asyncio
     async def test_chat_returns_trace_id(self, production_client):
