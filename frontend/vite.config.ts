@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  base: '/AI-Powered-Enterprise-Operations-Assistant/',
   server: {
     port: 3000,
     proxy: {

@@ -2,9 +2,11 @@ import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import { ChatPage, AboutPage, DemoPage, SecurityPage } from './pages';
 import './App.css';
 
+const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || '/';
+
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <div className="app">
         <nav className="app-nav" data-testid="app-nav">
           <div className="nav-brand">⚙️ Enterprise Ops</div>

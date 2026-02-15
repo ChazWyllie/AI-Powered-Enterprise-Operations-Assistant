@@ -7,7 +7,7 @@ services:
       - key: DEMO_MODE
         value: public
       - key: ALLOWED_ORIGINS
-        value: https://enterprise-ops.vercel.app
+        value: https://chazwyllie.github.io
       - key: RATE_LIMIT_RPM
         value: "10"
       - key: MAX_REQUEST_BYTES
