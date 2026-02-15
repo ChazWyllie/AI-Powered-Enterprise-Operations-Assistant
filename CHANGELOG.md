@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-02-14
+
+### Added
+
+- **WP14 Security & Abuse Testing**
+  - 44 adversarial security tests (`test_security_abuse.py`):
+    - Prompt injection (4): "ignore policy rm -rf", social engineering, jailbreak, execute_safe rm
+    - Chain operator injection (10): semicolon, AND, OR, pipe, backtick, $(), redirect I/O, newline, CR
+    - Blocked commands (10): rm, chmod, chown, kill, shutdown, reboot, mkfs, dd, curl, wget
+    - Path traversal (5): /etc/passwd, /sim/../../etc, /, /var/log, nested traversal
+    - Public mode blocking (3): execute_safe 403, plan_only 200, dangerous execute 403
+    - Audit denial reasons (6): blocked, metacharacter, path traversal reasons, allowed no denial, API audit
+    - Edge cases (6): unicode, HTML injection, SQL injection, null bytes, empty command, whitespace
+
+### Changed
+
+- Test count: 311 → 355 (+44)
+
 ## [0.13.0] - 2026-02-14
 
 ### Added
