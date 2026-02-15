@@ -18,4 +18,29 @@ describe('ErrorDisplay', () => {
     render(<ErrorDisplay error="Access denied" />);
     expect(screen.getByRole('alert')).toBeInTheDocument();
   });
+
+  it('shows rate limit hint', () => {
+    render(<ErrorDisplay error="Rate limit exceeded" />);
+    expect(screen.getByTestId('error-hint')).toHaveTextContent('wait a moment');
+  });
+
+  it('shows demo mode hint for 403', () => {
+    render(<ErrorDisplay error="execute_safe is not available in public demo mode" />);
+    expect(screen.getByTestId('error-hint')).toHaveTextContent('disabled in the public demo');
+  });
+
+  it('shows backend unreachable hint', () => {
+    render(<ErrorDisplay error="Failed to fetch" />);
+    expect(screen.getByTestId('error-hint')).toHaveTextContent('API server may be down');
+  });
+
+  it('shows policy violation hint', () => {
+    render(<ErrorDisplay error="Policy blocked this command" />);
+    expect(screen.getByTestId('error-hint')).toHaveTextContent('security policy');
+  });
+
+  it('shows request too large hint', () => {
+    render(<ErrorDisplay error="Request body too large" />);
+    expect(screen.getByTestId('error-hint')).toHaveTextContent('shorter prompt');
+  });
 });

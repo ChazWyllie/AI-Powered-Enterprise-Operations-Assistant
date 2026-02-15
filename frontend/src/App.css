@@ -171,10 +171,27 @@ button:disabled {
 
 /* Loading */
 .loading {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   color: var(--color-primary);
-  padding: 1rem;
+  padding: 1.5rem;
   font-style: italic;
+}
+
+.loading::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Error display */
@@ -187,17 +204,141 @@ button:disabled {
   margin-bottom: 1rem;
 }
 
+.error-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.error-icon {
+  font-size: 1.1rem;
+}
+
+.error-hint {
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
 /* Response sections */
 .response {
   margin-top: 1rem;
 }
 
-.response section {
+.response-section,
+.response-answer {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
-  padding: 1rem;
   margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+
+.response-answer {
+  padding: 1rem;
+}
+
+/* Collapsible section toggle */
+.section-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.section-toggle:hover {
+  background: var(--color-surface-hover);
+}
+
+.toggle-icon {
+  font-size: 0.7rem;
+  color: var(--color-text-secondary);
+  width: 1rem;
+  text-align: center;
+}
+
+.section-toggle h3 {
+  font-size: 0.95rem;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-badge {
+  font-size: 0.75rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(79, 143, 247, 0.15);
+  color: var(--color-primary);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.section-content {
+  padding: 0 1rem 1rem;
+}
+
+/* Copy button */
+.copy-button {
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+  background: var(--color-surface-hover);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-left: 0.5rem;
+}
+
+.copy-button:hover {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+/* Mode badge */
+.mode-badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.mode-plan_only {
+  background: rgba(79, 143, 247, 0.15);
+  color: var(--color-primary);
+}
+
+.mode-execute_safe {
+  background: rgba(251, 191, 36, 0.15);
+  color: var(--color-warning);
+}
+
+/* Script container */
+.script-container {
+  position: relative;
+}
+
+.script-container .copy-button {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 1;
+}
 }
 
 .response h3 {
@@ -206,6 +347,10 @@ button:disabled {
   margin-bottom: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+}
+
+.response-answer h3 {
+  margin-bottom: 0.5rem;
 }
 
 .response ul {

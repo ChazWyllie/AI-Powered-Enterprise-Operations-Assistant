@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ResponseRenderer } from '../components/ResponseRenderer';
 import type { ChatResponse } from '../types';
 
@@ -45,10 +45,11 @@ describe('ResponseRenderer', () => {
     expect(screen.getByTestId('response-answer')).toHaveTextContent('System is healthy');
   });
 
-  it('renders plan with correct step count', () => {
+  it('renders plan with step count badge', () => {
     render(<ResponseRenderer response={FULL_RESPONSE} />);
     const plan = screen.getByTestId('response-plan');
-    expect(plan).toHaveTextContent('Plan (2 steps)');
+    expect(plan).toHaveTextContent('Plan');
+    expect(plan).toHaveTextContent('2 steps');
     expect(plan).toHaveTextContent('get_system_status');
     expect(plan).toHaveTextContent('get_logs');
   });
@@ -65,15 +66,19 @@ describe('ResponseRenderer', () => {
     expect(actions).toHaveTextContent('✓ Success');
   });
 
-  it('renders generated script', () => {
+  it('renders generated script with copy button', () => {
     render(<ResponseRenderer response={FULL_RESPONSE} />);
     const script = screen.getByTestId('response-script');
     expect(script).toHaveTextContent('#!/bin/bash');
     expect(script).toHaveTextContent('echo "hello"');
+    expect(screen.getByTestId('copy-script')).toBeInTheDocument();
   });
 
-  it('renders audit information', () => {
+  it('renders audit info when toggle is clicked', () => {
     render(<ResponseRenderer response={FULL_RESPONSE} />);
+    // Audit is collapsed by default — click to expand
+    const toggle = screen.getByTestId('response-audit-toggle');
+    fireEvent.click(toggle);
     const audit = screen.getByTestId('response-audit');
     expect(audit).toHaveTextContent('trace-abc-123');
     expect(audit).toHaveTextContent('plan_only');
@@ -95,7 +100,7 @@ describe('ResponseRenderer', () => {
       plan: [{ tool: 'get_logs', args: {}, reasoning: 'test', executed: false }],
     };
     render(<ResponseRenderer response={singlePlan} />);
-    expect(screen.getByTestId('response-plan')).toHaveTextContent('Plan (1 step)');
+    expect(screen.getByTestId('response-plan')).toHaveTextContent('1 step');
   });
 
   it('shows error badge for failed actions', () => {
@@ -107,5 +112,26 @@ describe('ResponseRenderer', () => {
     };
     render(<ResponseRenderer response={failResponse} />);
     expect(screen.getByTestId('response-actions')).toHaveTextContent('✗ Command blocked');
+  });
+
+  it('toggles collapsible sections', () => {
+    render(<ResponseRenderer response={FULL_RESPONSE} />);
+    const planToggle = screen.getByTestId('response-plan-toggle');
+    // Initially open — content visible
+    expect(screen.getByTestId('response-plan')).toHaveTextContent('get_system_status');
+    // Click to close
+    fireEvent.click(planToggle);
+    // Content should be hidden
+    expect(screen.getByTestId('response-plan')).not.toHaveTextContent('get_system_status');
+    // Click to reopen
+    fireEvent.click(planToggle);
+    expect(screen.getByTestId('response-plan')).toHaveTextContent('get_system_status');
+  });
+
+  it('has copy button for trace ID', () => {
+    render(<ResponseRenderer response={FULL_RESPONSE} />);
+    // Expand audit section first
+    fireEvent.click(screen.getByTestId('response-audit-toggle'));
+    expect(screen.getByTestId('copy-trace-id')).toBeInTheDocument();
   });
 });

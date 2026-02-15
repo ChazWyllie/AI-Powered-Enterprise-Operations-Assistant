@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-02-14
+
+### Added
+
+- **WP15 UX/Performance Polish**
+  - Collapsible response sections (Plan, Actions, Script, Audit) with toggle buttons
+  - Copy-to-clipboard buttons on generated scripts and trace IDs
+  - Loading spinner animation (CSS keyframe spinner replacing plain text)
+  - Contextual error display with icons and recovery hints for:
+    - Rate limiting (⏱️), demo mode restrictions (🔒), request too large (📏)
+    - Backend unreachable (🔌), policy violations (🛡️)
+  - Mode badges with color coding (plan_only=blue, execute_safe=yellow)
+  - Section badges showing counts (e.g., "2 steps", "1 action")
+  - Audit section collapsed by default (less visual noise)
+  - 7 new frontend tests:
+    - ErrorDisplay: rate limit hint, demo mode hint, backend unreachable, policy violation, too large
+    - ResponseRenderer: collapsible toggle, copy trace-id button
+
+### Changed
+
+- Frontend test count: 29 → 36 (+7)
+- Total tests: 355 backend + 36 frontend = 391
+
 ## [0.14.0] - 2026-02-14
 
 ### Added
