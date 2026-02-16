@@ -8,6 +8,8 @@
 ![Coverage](https://img.shields.io/badge/coverage-92%25-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+🌐 **[Live Demo →](https://chazwyllie.github.io/AI-Powered-Enterprise-Operations-Assistant/)**
+
 ---
 
 ## Why It Matters
