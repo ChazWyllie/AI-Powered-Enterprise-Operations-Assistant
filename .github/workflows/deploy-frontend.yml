@@ -32,7 +32,7 @@ jobs:
       - run: npm ci
       - run: npm run build
         env:
-          VITE_API_URL: https://enterprise-ops-api.onrender.com
+          VITE_API_URL: https://enterprise-operations-assistant.onrender.com
 
       # SPA fallback — redirect 404s back to index.html
       - run: cp dist/index.html dist/404.html
